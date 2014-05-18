@@ -13,10 +13,14 @@ def get_buffer_contents(view):
 
 
 class SeeMeCode(sublime_plugin.EventListener):
-    def __init__(self):
-        self.io = SocketIO('localhost', 3000)
+    def ensure_started(self):
+        if not hasattr(self, 'io'):
+            print('SeeMeCode: Connecting to server')
+            settings = sublime.load_settings('SeeMeCode.sublime-settings')
+            self.io = SocketIO(settings.get('server'), settings.get('port'))
 
     def on_modified(self, view):
+        self.ensure_started()
         # for pos in view.sel():
         #     print(view.line(pos))
 
@@ -24,5 +28,6 @@ class SeeMeCode(sublime_plugin.EventListener):
         self.io.emit('write', {'content': buffer_contents})
 
     def on_activated(self, view):
+        self.ensure_started()
         buffer_contents = get_buffer_contents(view)
         self.io.emit('write', {'content': buffer_contents})
