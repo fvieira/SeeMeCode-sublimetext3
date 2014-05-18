@@ -38,7 +38,7 @@ class SeeMeCode(sublime_plugin.EventListener):
             buffer_contents = get_buffer_contents(view)
             try:
                 self.io.emit('write', {'content': buffer_contents})
-            except socketIO_client.exceptions.ConnectionError:
+            except socketIO_client.exceptions.SocketIOError:
                 self.reconnect()
 
     def on_modified(self, view):
