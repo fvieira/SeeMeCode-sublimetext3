@@ -16,8 +16,13 @@ class SeeMeCode(sublime_plugin.EventListener):
     def ensure_started(self):
         if not hasattr(self, 'io'):
             print('SeeMeCode: Connecting to server')
-            settings = sublime.load_settings('SeeMeCode.sublime-settings')
-            self.io = SocketIO(settings.get('server'), settings.get('port'))
+            self.settings = sublime.load_settings('SeeMeCode.sublime-settings')
+            self.settings.add_on_change('server', self.reconnect)
+            self.settings.add_on_change('port', self.reconnect)
+            self.reconnect()
+
+    def reconnect(self):
+        self.io = SocketIO(self.settings.get('server'), self.settings.get('port'))
 
     def on_modified(self, view):
         self.ensure_started()
