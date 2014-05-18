@@ -5,7 +5,7 @@ import sublime_plugin
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'third_party_libs'))
 
-from socketIO_client import SocketIO
+import socketIO_client
 
 
 def get_buffer_contents(view):
@@ -22,17 +22,18 @@ class SeeMeCode(sublime_plugin.EventListener):
             self.reconnect()
 
     def reconnect(self):
-        self.io = SocketIO(self.settings.get('server'), self.settings.get('port'))
+        self.io = socketIO_client.SocketIO(self.settings.get('server'), self.settings.get('port'))
+
+    def send_contents(self, view):
+        self.ensure_started()
+        buffer_contents = get_buffer_contents(view)
+        try:
+            self.io.emit('write', {'content': buffer_contents})
+        except socketIO_client.exceptions.ConnectionError:
+            self.reconnect()
 
     def on_modified(self, view):
-        self.ensure_started()
-        # for pos in view.sel():
-        #     print(view.line(pos))
-
-        buffer_contents = get_buffer_contents(view)
-        self.io.emit('write', {'content': buffer_contents})
+        self.send_contents(view)
 
     def on_activated(self, view):
-        self.ensure_started()
-        buffer_contents = get_buffer_contents(view)
-        self.io.emit('write', {'content': buffer_contents})
+        self.send_contents(view)
