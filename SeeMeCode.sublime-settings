@@ -1,10 +1,11 @@
 {
     // PROD
     // "server": "seemecode.fvieira.pt",
-    // "port": 80
+    // "port": 80,
 
     // DEV
     "server": "localhost",
     "port": 3000,
-    "enabled": false
+
+    "enabled": true
 }
