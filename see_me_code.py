@@ -4,11 +4,15 @@ import sublime
 import sublime_plugin
 import zlib
 import base64
+from threading import Thread
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'third_party_libs'))
 
 import socketIO_client
 import diff_match_patch
+
+# import logging
+# logging.basicConfig(level=logging.DEBUG)
 
 
 def get_buffer_contents(view):
@@ -37,6 +41,8 @@ class SeeMeCode(sublime_plugin.EventListener):
         if self.enabled:
             print('SeeMeCode: Connecting to server')
             self.io = socketIO_client.SocketIO(self.settings.get('server'), self.settings.get('port'))
+            # TODO this will create a thread every time!
+            Thread(target=self.io.wait).start()
 
     def send_whole_file(self, view):
         if self.enabled:
