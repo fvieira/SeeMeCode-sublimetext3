@@ -18,6 +18,8 @@ import diff_match_patch
 def get_buffer_contents(view):
     return view.substr(sublime.Region(0, view.size()))
 
+WAIT_THREAD = None
+
 
 class SeeMeCode(sublime_plugin.EventListener):
     def __init__(self):
@@ -37,12 +39,19 @@ class SeeMeCode(sublime_plugin.EventListener):
         if not hasattr(self, 'io'):
             self.reconnect()
 
+    def wait(self):
+        self.io.wait()
+
     def reconnect(self):
+        global WAIT_THREAD
         if self.enabled:
             print('SeeMeCode: Connecting to server')
+
             self.io = socketIO_client.SocketIO(self.settings.get('server'), self.settings.get('port'))
-            # TODO this will create a thread every time!
-            Thread(target=self.io.wait).start()
+
+            if WAIT_THREAD is not None:
+                WAIT_THREAD = Thread(target=self.wait)
+                WAIT_THREAD.start()
 
     def send_whole_file(self, view):
         if self.enabled:
